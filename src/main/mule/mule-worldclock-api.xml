@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="729644be-d13e-4b7d-b307-ab55aeadd3d8" >
+		<http:listener-connection host="0.0.0.0" port="8081"/>
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="67051b6c-b119-45ab-b781-be5903c7fff5" basePath="/api/time/current/" >
+		<http:request-connection host="timeapi.io" usePersistentConnections="false" protocol="HTTPS"/>
+	</http:request-config>
+	<flow name="mule-worldclock-apiFlow" doc:id="f660c2d3-735d-45b9-9d9d-7212eb9f0762" >
+		<http:listener doc:name="Listener" doc:id="c94dddae-9359-44cd-9434-f0e0da99283c" config-ref="HTTP_Listener_config" path="/currenttime/{zone}"/>
+		<logger level="INFO" doc:name="Logger" doc:id="c9e09e8f-45bb-4835-bcf1-7bfc0b754ba4" message="receiving parameters as #[attributes.queryParams.timezone]"/>
+		<http:request method="GET" doc:name="Request" doc:id="d3ad8190-017c-4f9e-b6d8-18e0fc66415e" config-ref="HTTP_Request_configuration" path="zone">
+			<http:query-params><![CDATA[#[output application/java
+---
+{
+	timezone : attributes.queryParams.timezone
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="0db673eb-5590-4d29-a3c2-6f3799ca5afd" message="#[payload]"/>
+	</flow>
+</mule>
